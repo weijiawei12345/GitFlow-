@@ -128,3 +128,4 @@ git branch -d issue-#001                                  # 删除本地热修�
 
 使用SourceTree注意事项：
 首先查看develop分支有没有其他人提交的记录，如果有需要pull下来的，先切回到develop分支先pull下来。然后切回到feature分支下。进行finish current操作。
+12345
