@@ -1,3 +1,9 @@
+主分支是main和develop，辅助分支是feature，release，hotfix
+个人总结：
+开发一个新功能的时候，从develop分支新建新的新功能feature分支，开发完毕提交后，需要先对develop分支进行拉取最新状态，再把本地的feacture分支合并本地的develop分支，再推送到远程，并删除本地的feature分支。
+发布一个版本的时候，从develop分支新建一个新的本地release分支，发布相关工作完成后，需要先对main分支，develop分支本地都拉取最新状态，再把本地的release分支分别合并到本地main，develop分支，新建对应的版本号tag，再推送到远程，并删除本地release分支。
+修复bug的时候，从main分支新建一个新的本地hotfix分支，完成相关修复工作后，需要先对main分支，develop分支本地都拉取最新状态，再把本地的hotfix分支分别合并到本地main，develop分支，新建对应的版本号tag，再推送到远程，并删除本地hotfix分支。
+
 分支名称	分支说明
 Production	生产分支，即 Master分支。只能从其他分支合并，不能直接修改
 Release	发布分支，基于 Develop 分支创建，待发布完成后合并到 Develop 和 Production 分支去
@@ -43,93 +49,79 @@ develop还不能马上发布，而客户急需这个bug的修复。
 同时hotfix也要合并回develop分支，这样develop分支就能享受到bug修复的好处了。
 当生产环境的代码（主要分支上代码）遇到严重到必须立即修复的缺陷时，就需要从主要分支上指定的tag版本（比如1.2）拉取热修复分支进行代码的紧急修复，并附上版本号（比如1.2.1）。这样做的好处是不会打断正在进行的开发分支的开发工作，能够让团队中负责功能开发的人与负责代码修复的人并行、独立的开展工作。
 
-太棒了！你成功了！🎉 从最后几行输出可以看到，你的 `gitflow学习.md` 文件已经顺利推送到 GitHub 仓库了。
+## 一、仓库初始化与远程连接
+git init                                                  # 初始化本地仓库
+git remote add origin https://github.com/weijiawei12345/GitFlow-.git   # 连接远程仓库
 
-根据你的要求，我把这次完整操作中所有用到的 Git 命令提取出来，并整理成一份清晰的学习流程，特别标注了中间遇到的分支名称不匹配问题及解决方法，方便你复习和制作学习笔记。
+## 二、首次提交与推送（master 分支）
+git add "gitflow学习.md"                                  # 添加文件到暂存区
+git commit -m "初始化：添加 gitflow 学习笔记"              # 提交到本地仓库
+git push -u origin master                                 # 首次推送 master 分支（-u 建立跟踪）
 
----
+## 三、创建并推送 develop 分支
+git branch develop                                        # 创建 develop 分支（基于当前 HEAD）
+git push -u origin develop                                # 推送 develop 分支到远程
 
-### 📚 Git 命令学习流程（完整版）
+## 四、获取远程最新信息
+git fetch origin                                          # 拉取远程所有分支的最新状态
 
-#### 阶段一：初始化本地仓库
-```bash
-# 1. 在项目文件夹中打开 Git Bash
-# 2. 初始化空的 Git 仓库（创建 .git 文件夹）
-git init
-```
-> 执行后，终端提示符会显示 `(master)` 或 `(main)`，表示当前分支名。
+## 五、切换分支
+git checkout develop                                      # 切换到 develop 分支
+git checkout master                                       # 切换到 master 分支
+git checkout -b some-feature develop                      # 创建并切换到新的功能开发feature分支（基于 develop）
 
-#### 阶段二：链接远程仓库
-```bash
-# 3. 添加远程仓库地址（origin 是默认远程仓库名）
-git remote add origin https://github.com/weijiawei12345/GitFlow-.git
-```
+## 六、查看状态与历史
+git status                                                # 查看当前工作区状态
+git branch                                                # 查看本地所有分支
+git branch -a                                             # 查看所有分支（含远程）
+git log --oneline --graph --all                           # 查看分支图谱（简洁版）
+git ls -la                                                # 查看目录文件（Shell 命令）
 
-#### 阶段三：添加并提交文件到本地仓库
-```bash
-# 4. 将指定文件添加到暂存区
-git add "gitflow学习.md"
+## 七、功能分支完整流程
+git add .                                                 # 添加所有修改到暂存区
+git commit -m "feat: 更新学习gitflow笔记并添加按钮流程分析"  # 提交
+git push -u origin some-feature                           # 首次推送功能分支 (辅助分支不是必须推送)
+git pull origin develop                                   # 拉取 develop 最新代码（保持同步）
+git checkout develop                                      # 切回 develop
+git merge some-feature                                    # 合并功能分支（Fast-forward）
+git push                                                  # 推送 develop 到远程
+git branch -d some-feature                                # 删除本地功能分支
 
-# 5. 将暂存区内容提交到本地仓库（-m 后面是提交说明）
-git commit -m "初始化：添加 gitflow 学习笔记"
-```
+## 八、发布分支完整流程
+git checkout -b release-0.1 develop                       # 创建发布分支（从develop分支创建发布分支）
+git push -u origin release-0.1                            # 推送发布分支(辅助分支不是必须推送)
+git pull origin master                                    # 拉取 master 最新代码（保持同步）
+git checkout master                                       # 切换到 master
 
-#### 阶段四：推送到远程仓库（关键！）
-```bash
-# 6. 第一次推送：将本地 master 分支推送到远程，并建立跟踪关系
-git push -u origin master
-```
+//命令本身不会产生合并节点，因为缺少 --no-ff 参数。使用SourceTree操作， 在后台帮你加了 --no-ff 执行。
+//如果你希望命令行操作也产生同样的节点，就把所有 git merge 改成 git merge --no-ff -m "..."。
 
----
+git merge release-0.1                                     # 合并发布分支到 master
+git push                                                  # 推送 master
+git pull origin develop                                   # 拉取 develop 最新代码（保持同步）
+git checkout develop                                      # 切回 develop
+git merge release-0.1                                     # 合并发布分支到 develop（同步修复）
+git push                                                  # 推送 develop
+git branch -d release-0.1                                 # 删除本地发布分支
 
-### ⚠️ 重点：分支名称不匹配问题解析
+## 九、打版本标签
+git tag -a 0.1 -m "Initial public release" master         # 在 master 上打带注释标签
+git push --tags                                           # 推送所有标签到远程
+git push origin v0.1.1                                    # 推送指定标签
 
-| 你的操作 | 报错信息 | 原因分析 | 正确做法 |
-|---|---|---|---|
-| `git push -u origin main` | `error: src refspec main does not match any` | 本地分支是 `master`，但命令中写了 `main`，两者不匹配 | 先查看本地分支名：`git branch`，然后用实际分支名替换命令中的分支名 |
-| `git push -u origin master` | 成功！ | 本地分支名 `master` 与命令中的分支名一致 | ✅ |
-
-**核心原则：** 推送命令中的分支名 **必须** 与本地当前分支名完全一致。
-
----
-
-### 🧠 两个实用命令（以备后用）
-
-```bash
-# 查看本地所有分支（当前分支前会有 * 号）
-git branch
-
-# 重命名当前分支（例如将 master 改为 main）
-git branch -m master main   # 然后推送时用 git push -u origin main
-```
-
----
-
-### 📝 你的操作日志对照表
-
-| 你的实际命令 | 执行结果 | 关键知识点 |
-|---|---|---|
-| `git init` | 初始化成功 | 创建 `.git` 文件夹，开始版本控制 |
-| `git remote add origin ...` | 成功 | 设置远程仓库地址 |
-| `git add "gitflow学习.md"` | 成功 | 将文件加入暂存区 |
-| `git commit -m "..."` | 成功（提交 ID: `db53ba3`） | 保存快照到本地仓库 |
-| `git push -u origin main` | ❌ 失败 | 分支名不匹配（本地是 master） |
-| `git push -u origin master` | ✅ 成功 | 分支名匹配，推送成功 |
-
----
-
-### 🎯 总结流程图
-
-```mermaid
-flowchart LR
-    A[git init] --> B[git remote add origin ...]
-    B --> C[git add 文件名]
-    C --> D[git commit -m "说明"]
-    D --> E{检查当前分支名<br>git branch}
-    E -->|分支是 master| F[git push -u origin master]
-    E -->|分支是 main| G[git push -u origin main]
-    F --> H[✅ 推送成功]
-    G --> H
-```
-
-现在你的仓库已经建立好了，以后每次更新笔记，只需要重复 `git add` → `git commit` → `git push` 这三个步骤（不需要再 `init` 和 `remote add` 了）。祝你 GitFlow 学习顺利！😊
+## 十、热修复分支完整流程
+git checkout -b issue-#001 master                         # 创建热修复分支（基于 master）
+git add hotfix.md                                         # 添加修复文件
+git commit -m "fix: 添加 hotfix 记录文档"                  # 提交修复
+git push -u origin issue-#001                             # 推送热修复分支(辅助分支不是必须推送)
+git checkout master                                       # 切回 master
+git pull origin master                                    # 拉取最新 master（保持同步）
+git merge issue-#001                                      # 合并热修复分支到 master
+git tag -a v0.1.1 -m "热修复 issue-#001"                   # 打补丁版本标签
+git push origin master                                    # 推送 master
+git push origin v0.1.1                                    # 推送标签
+git pull origin develop                                   # 拉取 develop 最新代码（保持同步）
+git checkout develop                                      # 切回 develop
+git merge issue-#001                                      # 合并热修复到 develop（同步）
+git push origin develop                                   # 推送 develop
+git branch -d issue-#001                                  # 删除本地热修复分支
